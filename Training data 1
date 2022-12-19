@@ -1,0 +1,150 @@
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:25:17.591969Z","iopub.execute_input":"2022-12-19T06:25:17.592575Z","iopub.status.idle":"2022-12-19T06:25:17.790332Z","shell.execute_reply.started":"2022-12-19T06:25:17.592429Z","shell.execute_reply":"2022-12-19T06:25:17.788824Z"}}
+# This Python 3 environment comes with many helpful analytics libraries installed
+# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python
+# For example, here's several helpful packages to load
+
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+
+# Input data files are available in the read-only "../input/" directory
+# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory
+
+import os
+for dirname, _, filenames in os.walk('/kaggle/input'):
+    for filename in filenames:
+        print(os.path.join(dirname, filename))
+
+# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using "Save & Run All" 
+# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:26:53.155017Z","iopub.execute_input":"2022-12-19T06:26:53.155604Z","iopub.status.idle":"2022-12-19T06:26:53.164328Z","shell.execute_reply.started":"2022-12-19T06:26:53.155560Z","shell.execute_reply":"2022-12-19T06:26:53.162364Z"}}
+#!pip install sklearn 
+import sklearn as sk
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:25:19.206840Z","iopub.execute_input":"2022-12-19T06:25:19.207237Z","iopub.status.idle":"2022-12-19T06:25:19.403414Z","shell.execute_reply.started":"2022-12-19T06:25:19.207201Z","shell.execute_reply":"2022-12-19T06:25:19.401972Z"}}
+#help(sk)
+from sklearn import pipeline as pl
+from sklearn import linear_model as lm
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:25:19.404952Z","iopub.execute_input":"2022-12-19T06:25:19.405336Z","iopub.status.idle":"2022-12-19T06:25:19.487795Z","shell.execute_reply.started":"2022-12-19T06:25:19.405304Z","shell.execute_reply":"2022-12-19T06:25:19.486203Z"}}
+Unemployment=pd.read_csv('/kaggle/input/world-economic-data/unemployment.csv')
+Cost_of_living=pd.read_csv('/kaggle/input/cost-of-living/cost-of-living.csv')
+Wealth=pd.read_csv('/kaggle/input/world-economic-data/richest_countries.csv')
+Corruption =pd.read_csv('/kaggle/input/world-economic-data/corruption.csv')
+Salaries=pd.read_csv('/kaggle/input/analytics-industry-salaries-2022-india/Salary Dataset.csv')
+#Moms=pd.read_json('/kaggle/input/the-working-moms/__output__.json')
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:25:19.490925Z","iopub.execute_input":"2022-12-19T06:25:19.491332Z","iopub.status.idle":"2022-12-19T06:25:20.864177Z","shell.execute_reply.started":"2022-12-19T06:25:19.491300Z","shell.execute_reply":"2022-12-19T06:25:20.862584Z"}}
+import plotly
+import plotly.graph_objects as go
+import plotly.express as px
+#help(go.Figure)
+#help(px.scatter)
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:25:20.866154Z","iopub.execute_input":"2022-12-19T06:25:20.866618Z","iopub.status.idle":"2022-12-19T06:25:20.895048Z","shell.execute_reply.started":"2022-12-19T06:25:20.866573Z","shell.execute_reply":"2022-12-19T06:25:20.893591Z"}}
+Salaries.tail()
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:25:20.896700Z","iopub.execute_input":"2022-12-19T06:25:20.897098Z","iopub.status.idle":"2022-12-19T06:25:20.903223Z","shell.execute_reply.started":"2022-12-19T06:25:20.897065Z","shell.execute_reply":"2022-12-19T06:25:20.901839Z"}}
+import plotly.express as px
+
+# %% [code] {"jupyter":{"outputs_hidden":false}}
+
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:25:20.904810Z","iopub.execute_input":"2022-12-19T06:25:20.905278Z","iopub.status.idle":"2022-12-19T06:25:22.350053Z","shell.execute_reply.started":"2022-12-19T06:25:20.905240Z","shell.execute_reply":"2022-12-19T06:25:22.348643Z"}}
+Wealth.dtypes
+ax=px.scatter(Wealth.sort_values(by='gdp_per_capita').tail(100),x='gdp_per_capita',y='country',size='gdp_per_capita', hover_data=['country'],size_max=60)
+ax
+
+print(f"min: {Wealth['gdp_per_capita'].min()}\nMax: {Wealth['gdp_per_capita'].max()}\n {Wealth['gdp_per_capita'].max()- Wealth['gdp_per_capita'].min()}")
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:25:22.351752Z","iopub.execute_input":"2022-12-19T06:25:22.352155Z","iopub.status.idle":"2022-12-19T06:25:22.420296Z","shell.execute_reply.started":"2022-12-19T06:25:22.352112Z","shell.execute_reply":"2022-12-19T06:25:22.418941Z"}}
+cost_of_living=Cost_of_living.transpose()
+cost_of_living.columns=cost_of_living.loc['Unnamed: 0']
+cost_of_living.drop('Unnamed: 0', axis=0, inplace=True)
+cost_of_living=cost_of_living.astype(float)
+cost_of_living['city']=list(cost_of_living.index)
+cost_of_living.index=list(range(len(cost_of_living['Meal, Inexpensive Restaurant'])))
+cost_of_living[['City','State', 'Country']]=cost_of_living['city'].str.split(',',2,expand=True)
+reg=cost_of_living[cost_of_living['Country'].isnull()==True]
+reg
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:25:22.421728Z","iopub.execute_input":"2022-12-19T06:25:22.422098Z","iopub.status.idle":"2022-12-19T06:25:22.920438Z","shell.execute_reply.started":"2022-12-19T06:25:22.422067Z","shell.execute_reply":"2022-12-19T06:25:22.919101Z"}}
+for i in reg.index:
+    cost_of_living.loc[i,'Country']=cost_of_living.loc[i,'State']
+cost_of_living.drop('city', axis=1, inplace=True)
+cost_of_living.set_index('City', inplace=True)
+cost_of_living
+high=px.scatter(cost_of_living.sort_values(by='Meal, Inexpensive Restaurant').tail(30),x='Mortgage Interest Rate in Percentages (%), Yearly, for 20 Years Fixed-Rate',size='Average Monthly Net Salary (After Tax)', size_max=35, hover_data=['Country'], color='Country')
+Lows=px.scatter(cost_of_living.sort_values(by='Meal, Inexpensive Restaurant').head(10),x='Meal, Inexpensive Restaurant',size='Meal, Inexpensive Restaurant', size_max=50,hover_data=['Country'])
+mve=Lows=px.scatter(cost_of_living.sort_values(by='Average Monthly Net Salary (After Tax)').tail(20),x='Meal, Inexpensive Restaurant',y='Average Monthly Net Salary (After Tax)',size='Mortgage Interest Rate in Percentages (%), Yearly, for 20 Years Fixed-Rate', size_max=50,hover_data=['Country'], color='Country')
+blow=px.bar(cost_of_living.sort_values(by='Meal, Inexpensive Restaurant').tail(30),x='Meal, Inexpensive Restaurant')
+high
+mve
+#cost_of_living.columns
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T08:08:01.639931Z","iopub.execute_input":"2022-12-19T08:08:01.640415Z","iopub.status.idle":"2022-12-19T08:08:01.676307Z","shell.execute_reply.started":"2022-12-19T08:08:01.640380Z","shell.execute_reply":"2022-12-19T08:08:01.675023Z"}}
+#high 
+#mve
+fig2=go.Figure(data=high.data+mve.data)
+fig2
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T08:05:57.828967Z","iopub.execute_input":"2022-12-19T08:05:57.829431Z","iopub.status.idle":"2022-12-19T08:05:58.332559Z","shell.execute_reply.started":"2022-12-19T08:05:57.829397Z","shell.execute_reply":"2022-12-19T08:05:58.330977Z"}}
+splot=sns.regplot(data=cost_of_living, x='Average Monthly Net Salary (After Tax)', y='Basic (Electricity, Heating, Cooling, Water, Garbage) for 85m2 Apartment')
+#plp=px.scatter(cost_of_living, x='Average Monthly Net Salary (After Tax)', y='Basic (Electricity, Heating, Cooling, Water, Garbage) for 85m2 Apartment',size='Apartment (1 bedroom) in City Centre', hover_data=['Country'], color='Country')
+xppx=px.scatter(cost_of_living.sort_values(by='Average Monthly Net Salary (After Tax)').tail(30), x='Average Monthly Net Salary (After Tax)', y='Apartment (1 bedroom) in City Centre' ,size='Apartment (1 bedroom) in City Centre', hover_data=['Country'], color='Country')
+xppx
+cost_of_living.corr()[cost_of_living.corr()>0.60]['Average Monthly Net Salary (After Tax)'].to_frame()
+
+# %% [code] {"execution":{"iopub.status.busy":"2022-12-19T08:06:05.658630Z","iopub.execute_input":"2022-12-19T08:06:05.659107Z","iopub.status.idle":"2022-12-19T08:06:05.673187Z","shell.execute_reply.started":"2022-12-19T08:06:05.659071Z","shell.execute_reply":"2022-12-19T08:06:05.671859Z"}}
+xppx
+
+
+# %% [code] {"execution":{"iopub.status.busy":"2022-12-19T08:11:50.212264Z","iopub.execute_input":"2022-12-19T08:11:50.212734Z","iopub.status.idle":"2022-12-19T08:11:50.232143Z","shell.execute_reply.started":"2022-12-19T08:11:50.212699Z","shell.execute_reply":"2022-12-19T08:11:50.230503Z"}}
+#dir(cost_of_living)
+help(sk.pipeline)
+#pipe=sk.pipeline()
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:25:23.884261Z","iopub.execute_input":"2022-12-19T06:25:23.885055Z","iopub.status.idle":"2022-12-19T06:25:23.894244Z","shell.execute_reply.started":"2022-12-19T06:25:23.885006Z","shell.execute_reply":"2022-12-19T06:25:23.892883Z"}}
+cost_of_living.columns
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:25:23.898587Z","iopub.execute_input":"2022-12-19T06:25:23.899057Z","iopub.status.idle":"2022-12-19T06:25:23.931155Z","shell.execute_reply.started":"2022-12-19T06:25:23.899019Z","shell.execute_reply":"2022-12-19T06:25:23.929573Z"}}
+figure1=go.Figure(high.data+blow.data)
+figure1
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:25:23.932624Z","iopub.execute_input":"2022-12-19T06:25:23.933049Z","iopub.status.idle":"2022-12-19T06:25:23.952766Z","shell.execute_reply.started":"2022-12-19T06:25:23.933014Z","shell.execute_reply":"2022-12-19T06:25:23.951259Z"}}
+cost_of_living.index
+cost_of_living.loc['Mumbai'].to_frame()
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:25:23.954783Z","iopub.execute_input":"2022-12-19T06:25:23.955343Z","iopub.status.idle":"2022-12-19T06:25:24.083124Z","shell.execute_reply.started":"2022-12-19T06:25:23.955291Z","shell.execute_reply":"2022-12-19T06:25:24.081888Z"}}
+
+fig=px.scatter(cost_of_living.sort_values(by='Average Monthly Net Salary (After Tax)').tail(30),x='Average Monthly Net Salary (After Tax)', size='Basic (Electricity, Heating, Cooling, Water, Garbage) for 85m2 Apartment' ,size_max=30,color='Country')
+fig
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:25:24.084916Z","iopub.execute_input":"2022-12-19T06:25:24.085430Z","iopub.status.idle":"2022-12-19T06:25:24.099980Z","shell.execute_reply.started":"2022-12-19T06:25:24.085379Z","shell.execute_reply":"2022-12-19T06:25:24.098565Z"}}
+Unemployment.dtypes
+#help(Unemployment.sort_values)
+Unemployment.sort_values('unemployment_rate').tail(10)
+#stats=Unemployment['unemployment_rate'].describe()
+#stats.to_frame()
+#Unemployment.country
+zs_sa=(Unemployment[Unemployment['country']=='South Africa']['unemployment_rate']-Unemployment['unemployment_rate'].mean())/ Unemployment['unemployment_rate'].std()
+zs_sa
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:25:24.101546Z","iopub.execute_input":"2022-12-19T06:25:24.101955Z","iopub.status.idle":"2022-12-19T06:25:24.171105Z","shell.execute_reply.started":"2022-12-19T06:25:24.101923Z","shell.execute_reply":"2022-12-19T06:25:24.169780Z"}}
+#help()
+unempl=px.scatter(Unemployment.sort_values(by='unemployment_rate').tail(30), x='unemployment_rate',y='country', size='unemployment_rate')
+#figure1=go.Figure(unempl.data+Lows.data)
+unempl
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:25:24.172964Z","iopub.execute_input":"2022-12-19T06:25:24.174218Z","iopub.status.idle":"2022-12-19T06:25:24.207617Z","shell.execute_reply.started":"2022-12-19T06:25:24.174168Z","shell.execute_reply":"2022-12-19T06:25:24.206202Z"}}
+cost_of_living.head()
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:25:24.209183Z","iopub.execute_input":"2022-12-19T06:25:24.209705Z","iopub.status.idle":"2022-12-19T06:25:24.253780Z","shell.execute_reply.started":"2022-12-19T06:25:24.209666Z","shell.execute_reply":"2022-12-19T06:25:24.252424Z"}}
+cost_of_living
+
+# %% [code] {"jupyter":{"outputs_hidden":false},"execution":{"iopub.status.busy":"2022-12-19T06:36:30.674166Z","iopub.execute_input":"2022-12-19T06:36:30.674666Z","iopub.status.idle":"2022-12-19T06:36:30.793444Z","shell.execute_reply.started":"2022-12-19T06:36:30.674628Z","shell.execute_reply":"2022-12-19T06:36:30.792137Z"}}
+
+
+# %% [code]
